@@ -4,15 +4,7 @@ django-cors-headers
 python-dotenv
 pandas
 numpy
-scikit-learn
-statsmodels
-xgboost
-prophet
-matplotlib
-seaborn
-Pillow
-celery
-redis
-psycopg2-binary
 gunicorn
 whitenoise
+scikit-learn
+xgboost

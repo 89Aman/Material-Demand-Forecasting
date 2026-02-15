@@ -37,14 +37,11 @@ class ProcurementOrder(models.Model):
     quantity = models.IntegerField(validators=[MinValueValidator(1)])
     unit_cost = models.DecimalField(max_digits=10, decimal_places=2, validators=[MinValueValidator(0)])
     total_cost = models.DecimalField(max_digits=12, decimal_places=2, validators=[MinValueValidator(0)])
-
     order_date = models.DateField(auto_now_add=True)
     expected_delivery_date = models.DateField()
     actual_delivery_date = models.DateField(null=True, blank=True)
-
     status = models.CharField(max_length=20, choices=ORDER_STATUS_CHOICES, default='draft')
     forecast_id = models.CharField(max_length=100, blank=True, help_text="Reference to forecast that triggered this order")
-
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -59,6 +56,6 @@ class ProcurementOrder(models.Model):
         return f"PO-{self.id} - {self.product.name}"
 
 
-def save(self, *args, **kwargs):
+    def save(self, *args, **kwargs):
         self.total_cost = self.quantity * self.unit_cost
         super().save(*args, **kwargs)

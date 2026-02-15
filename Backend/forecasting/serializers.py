@@ -4,7 +4,7 @@ from .models import Product, HistoricalDemand, Forecast, ForecastDetail
 class ProductSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
-    fields = 'all'
+        fields = '__all__'
 
 class HistoricalDemandSerializer(serializers.ModelSerializer):
     product_name = serializers.CharField(source='product.name', read_only=True)

@@ -4,7 +4,7 @@ from .models import Supplier, ProcurementOrder
 class SupplierSerializer(serializers.ModelSerializer):
     class Meta:
         model = Supplier
-        fields = 'all'
+        fields = '__all__'
 
 class ProcurementOrderSerializer(serializers.ModelSerializer):
     product_name = serializers.CharField(source='product.name', read_only=True)

@@ -1,47 +1,50 @@
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from django.utils import timezone
+from django.db.models import Avg
 from datetime import timedelta
 import pandas as pd
+import logging
 
 from .models import Product, HistoricalDemand, Forecast, ForecastDetail
 from .serializers import ProductSerializer, HistoricalDemandSerializer, ForecastSerializer, BulkForecastSerializer
 from .ml_engine import DemandForecaster
 
+logger = logging.getLogger(__name__)
+
 class ProductViewSet(viewsets.ModelViewSet):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
     search_fields = ['name', 'sku', 'category']
     ordering_fields = ['created_at', 'name']
 
 class HistoricalDemandViewSet(viewsets.ModelViewSet):
     queryset = HistoricalDemand.objects.all()
     serializer_class = HistoricalDemandSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
     search_fields = ['product__name', 'product__sku']
     ordering_fields = ['date', 'quantity_demanded']
 
-
-@action(detail=False, methods=['post'])
-def bulk_create(self, request):
-    """Bulk upload historical demand data"""
-    serializer = HistoricalDemandSerializer(data=request.data, many=True)
-    if serializer.is_valid():
-        serializer.save()
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    @action(detail=False, methods=['post'])
+    def bulk_create(self, request):
+        """Bulk upload historical demand data"""
+        serializer = HistoricalDemandSerializer(data=request.data, many=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class ForecastViewSet(viewsets.ModelViewSet):
     queryset = Forecast.objects.all()
     serializer_class = ForecastSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
     search_fields = ['product__name', 'algorithm']
     ordering_fields = ['forecast_date', 'accuracy_score']
 
-    
+
     @action(detail=False, methods=['post'])
     def generate(self, request):
         """Generate forecasts for products"""
@@ -85,13 +88,13 @@ class ForecastViewSet(viewsets.ModelViewSet):
                     product=product,
                     algorithm=algorithm,
                     forecast_date=forecast_date,
-                    predicted_demand=float(result['forecast']),
-                    confidence_interval_lower=float(result['lower_bound']),
-                    confidence_interval_upper=float(result['upper_bound']),
-                    mae=result.get('mae'),
-                    rmse=result.get('rmse'),
-                    mape=result.get('mape'),
-                    accuracy_score=result.get('accuracy'),
+                    predicted_demand=float(result['forecast'][0]),
+                    confidence_interval_lower=float(result['lower_bound'][0]),
+                    confidence_interval_upper=float(result['upper_bound'][0]),
+                    mae=float(result.get('mae', 0)),
+                    rmse=float(result.get('rmse', 0)),
+                    mape=float(result.get('mape', 0)),
+                    accuracy_score=float(result.get('accuracy', 0)),
                     status='completed',
                     forecast_horizon_days=horizon,
                 )
@@ -134,10 +137,10 @@ class ForecastViewSet(viewsets.ModelViewSet):
         
         report = {
             'total_forecasts': forecasts.count(),
-            'avg_accuracy': forecasts.filter(accuracy_score__isnull=False).aggregate(models.Avg('accuracy_score'))['accuracy_score__avg'],
-            'avg_mae': forecasts.filter(mae__isnull=False).aggregate(models.Avg('mae'))['mae__avg'],
-            'avg_rmse': forecasts.filter(rmse__isnull=False).aggregate(models.Avg('rmse'))['rmse__avg'],
-            'avg_mape': forecasts.filter(mape__isnull=False).aggregate(models.Avg('mape'))['mape__avg'],
+            'avg_accuracy': forecasts.filter(accuracy_score__isnull=False).aggregate(Avg('accuracy_score'))['accuracy_score__avg'],
+            'avg_mae': forecasts.filter(mae__isnull=False).aggregate(Avg('mae'))['mae__avg'],
+            'avg_rmse': forecasts.filter(rmse__isnull=False).aggregate(Avg('rmse'))['rmse__avg'],
+            'avg_mape': forecasts.filter(mape__isnull=False).aggregate(Avg('mape'))['mape__avg'],
         }
         
         return Response(report)

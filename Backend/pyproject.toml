@@ -6,4 +6,6 @@ readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
     "django==4.2.7",
+    "djangorestframework-stubs>=3.16.7",
+    "pandas-stubs~=2.3.3",
 ]

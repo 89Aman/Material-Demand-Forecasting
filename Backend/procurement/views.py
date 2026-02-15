@@ -1,7 +1,7 @@
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from django.utils import timezone
 from datetime import timedelta
 from forecasting.models import Forecast
@@ -12,12 +12,12 @@ from .serializers import SupplierSerializer, ProcurementOrderSerializer
 class SupplierViewSet(viewsets.ModelViewSet):
     queryset = Supplier.objects.all()
     serializer_class = SupplierSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
 
 class ProcurementOrderViewSet(viewsets.ModelViewSet):
     queryset = ProcurementOrder.objects.all()
     serializer_class = ProcurementOrderSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
     search_fields = ['product__name', 'supplier__name', 'status']
     ordering_fields = ['order_date', 'expected_delivery_date', 'status']
 
