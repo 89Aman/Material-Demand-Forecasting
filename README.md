@@ -36,34 +36,6 @@ A comprehensive supply chain management tool designed to forecast material deman
 
 ---
 
-## 💻 Local Setup
-
-### 1. Clone the Repository
-```bash
-git clone git@github.com:89Aman/Material-Demand-Forecasting.git
-cd Material-Demand-Forecasting
-```
-
-### 2. Backend Setup
-```bash
-cd Backend
-python -m venv .venv
-source .venv/bin/activate  # Windows: .venv\Scripts\activate
-pip install -r requirements.txt
-python manage.py migrate
-python manage.py runserver 8000
-```
-
-### 3. Frontend Setup
-```bash
-cd frontend
-npm install
-npm run dev
-```
-The app will be available at `http://localhost:8080`.
-
----
-
 ## ☁️ Cloud Deployment
 
 The system is containerized using Docker and deployed to **Google Cloud Run**.
@@ -73,7 +45,3 @@ The system is containerized using Docker and deployed to **Google Cloud Run**.
 - **CI/CD**: Built using Google Cloud Build with specific optimizations for ML library constraints.
 
 ---
-
-## 📄 License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
