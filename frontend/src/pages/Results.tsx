@@ -14,10 +14,11 @@ export default function Results() {
   const forecastId = location.state?.forecastId;
 
   const [forecast, setForecast] = useState<any>(null);
-  const [isLoading, setIsLoading] = useState(!!forecastId);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     if (forecastId) {
+      setIsLoading(true);
       async function loadForecast() {
         try {
           const data = await apiFetch(`/forecasts/${forecastId}/`);
@@ -31,24 +32,30 @@ export default function Results() {
       }
       loadForecast();
     } else if (resultData) {
-      // If we just came from NewForecast, the result might contain the IDs
-      // But the generate action returns a list of created IDs
       if (resultData.created_forecasts && resultData.created_forecasts.length > 0) {
         const id = resultData.created_forecasts[0];
+        setIsLoading(true);
         async function loadNewForecast() {
           try {
             const data = await apiFetch(`/forecasts/${id}/`);
             setForecast(data);
           } catch (error) {
             console.error("Failed to load new forecast:", error);
+            toast.error("Failed to load forecast details");
+          } finally {
+            setIsLoading(false);
           }
         }
         loadNewForecast();
+      } else {
+        setIsLoading(false);
       }
+    } else {
+      setIsLoading(false);
     }
   }, [forecastId, resultData]);
 
-  if (!formData && !forecast) {
+  if (!isLoading && !formData && !forecast) {
     return (
       <div className="container py-16 text-center">
         <h2 className="mb-4 text-2xl font-bold">No forecast data available</h2>
@@ -100,7 +107,24 @@ export default function Results() {
     navigate("/history");
   };
 
-  const displayData = forecast || {
+  // Compute totals from detail records as fallback when predicted_demand is 0
+  const computedDemand = forecast?.details?.reduce(
+    (sum: number, d: any) => sum + (d.predicted_quantity || 0), 0
+  ) || 0;
+  const computedLower = forecast?.details?.reduce(
+    (sum: number, d: any) => sum + (d.lower_bound || 0), 0
+  ) || 0;
+  const computedUpper = forecast?.details?.reduce(
+    (sum: number, d: any) => sum + (d.upper_bound || 0), 0
+  ) || 0;
+
+  const displayData = forecast ? {
+    ...forecast,
+    // Use stored value if non-zero, otherwise compute from details
+    predicted_demand: forecast.predicted_demand > 0 ? forecast.predicted_demand : computedDemand,
+    confidence_interval_lower: forecast.confidence_interval_lower > 0 ? forecast.confidence_interval_lower : computedLower,
+    confidence_interval_upper: forecast.confidence_interval_upper > 0 ? forecast.confidence_interval_upper : computedUpper,
+  } : {
     product_name: formData?.material,
     forecast_horizon_days: (formData?.horizon || 0) * 7,
     predicted_demand: 0,
