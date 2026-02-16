@@ -6,6 +6,7 @@ from django.utils import timezone
 from django.db.models import Avg
 from datetime import timedelta
 import pandas as pd
+import numpy as np
 import logging
 
 from .models import Product, HistoricalDemand, Forecast, ForecastDetail
@@ -82,15 +83,19 @@ class ForecastViewSet(viewsets.ModelViewSet):
                 forecaster = DemandForecaster(df)
                 result = forecaster.forecast(algorithm=algorithm, horizon_days=horizon)
                 
-                # Save forecast
+                # Save forecast - use total demand across all forecast days
                 forecast_date = timezone.now().date()
+                total_demand = float(np.sum(result['forecast']))
+                total_lower = float(np.sum(result['lower_bound']))
+                total_upper = float(np.sum(result['upper_bound']))
+                
                 forecast = Forecast.objects.create(
                     product=product,
                     algorithm=algorithm,
                     forecast_date=forecast_date,
-                    predicted_demand=float(result['forecast'][0]),
-                    confidence_interval_lower=float(result['lower_bound'][0]),
-                    confidence_interval_upper=float(result['upper_bound'][0]),
+                    predicted_demand=round(total_demand, 2),
+                    confidence_interval_lower=round(total_lower, 2),
+                    confidence_interval_upper=round(total_upper, 2),
                     mae=float(result.get('mae', 0)),
                     rmse=float(result.get('rmse', 0)),
                     mape=float(result.get('mape', 0)),

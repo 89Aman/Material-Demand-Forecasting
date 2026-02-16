@@ -47,7 +47,7 @@ export default function NewForecast() {
   const [formData, setFormData] = useState({
     materialId: "",
     location: "",
-    horizon: 8,
+    horizon: 1,
     scenario: "baseline",
   });
 
@@ -129,9 +129,9 @@ export default function NewForecast() {
               </SelectTrigger>
               <SelectContent>
                 {productsError ? (
-                   <SelectItem value="error" disabled>Error loading products</SelectItem>
+                  <SelectItem value="error" disabled>Error loading products</SelectItem>
                 ) : products.length === 0 ? (
-                   <SelectItem value="loading" disabled>Loading products...</SelectItem>
+                  <SelectItem value="loading" disabled>Loading products...</SelectItem>
                 ) : (
                   products.map((p) => (
                     <SelectItem key={p.id} value={p.id.toString()}>

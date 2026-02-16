@@ -150,9 +150,15 @@ export default function Results() {
               </h3>
               <div className="space-y-4">
                 <div className="flex justify-between border-b pb-2">
-                  <span className="text-muted-foreground">Predicted Demand</span>
-                  <span className="font-semibold">{displayData.predicted_demand.toLocaleString()} units</span>
+                  <span className="text-muted-foreground">Total Predicted Demand</span>
+                  <span className="font-semibold">{Math.round(displayData.predicted_demand).toLocaleString()} units</span>
                 </div>
+                {displayData.confidence_interval_lower != null && displayData.confidence_interval_upper != null && (
+                  <div className="flex justify-between border-b pb-2">
+                    <span className="text-muted-foreground">Confidence Range</span>
+                    <span className="font-semibold text-sm">{Math.round(displayData.confidence_interval_lower).toLocaleString()} – {Math.round(displayData.confidence_interval_upper).toLocaleString()} units</span>
+                  </div>
+                )}
                 <div className="flex justify-between border-b pb-2">
                   <span className="text-muted-foreground">Model Accuracy</span>
                   <span className="font-semibold">{displayData.accuracy_score ? `${displayData.accuracy_score}%` : 'Pending'}</span>
