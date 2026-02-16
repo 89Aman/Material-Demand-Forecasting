@@ -69,14 +69,14 @@ class ForecastViewSet(viewsets.ModelViewSet):
                 # Get historical data
                 history = HistoricalDemand.objects.filter(product=product).order_by('date')
                 
-                if history.count() < 30:
+                if history.count() < 5:
                     continue
                 
                 # Prepare data
                 data = list(history.values('date', 'quantity_demanded'))
                 df = pd.DataFrame(data)
                 
-                if len(df) < 20:
+                if len(df) < 5:
                     continue
                 
                 # Forecast
