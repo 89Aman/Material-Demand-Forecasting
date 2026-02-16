@@ -63,13 +63,19 @@ class ForecastViewSet(viewsets.ModelViewSet):
             products = Product.objects.all()
         
         created_forecasts = []
+        skipped_products = []
         
         for product in products:
             try:
                 # Get historical data
                 history = HistoricalDemand.objects.filter(product=product).order_by('date')
                 
-                if history.count() < 5:
+                hist_count = history.count()
+                if hist_count < 5:
+                    skipped_products.append({
+                        'product': product.name,
+                        'reason': f'Insufficient historical data ({hist_count} records, need at least 5)'
+                    })
                     continue
                 
                 # Prepare data
@@ -77,6 +83,10 @@ class ForecastViewSet(viewsets.ModelViewSet):
                 df = pd.DataFrame(data)
                 
                 if len(df) < 5:
+                    skipped_products.append({
+                        'product': product.name,
+                        'reason': f'Insufficient data after processing ({len(df)} records)'
+                    })
                     continue
                 
                 # Forecast
@@ -130,10 +140,17 @@ class ForecastViewSet(viewsets.ModelViewSet):
                     error_message=str(e),
                 )
         
-        return Response({
+        response_data = {
             'created_forecasts': created_forecasts,
             'total_forecasted': len(created_forecasts),
-        }, status=status.HTTP_201_CREATED)
+        }
+        if skipped_products:
+            response_data['skipped'] = skipped_products
+        
+        if len(created_forecasts) == 0 and skipped_products:
+            return Response(response_data, status=status.HTTP_400_BAD_REQUEST)
+        
+        return Response(response_data, status=status.HTTP_201_CREATED)
 
     @action(detail=False, methods=['get'])
     def accuracy_report(self, request):
