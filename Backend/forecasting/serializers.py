@@ -27,7 +27,7 @@ class ForecastSerializer(serializers.ModelSerializer):
         model = Forecast
         fields = ['id', 'product', 'product_name', 'algorithm', 'forecast_date', 'predicted_demand', 
                 'confidence_interval_lower', 'confidence_interval_upper', 'mae', 'rmse', 'mape', 
-                'accuracy_score', 'status', 'details', 'created_at']
+                'accuracy_score', 'status', 'forecast_horizon_days', 'error_message', 'details', 'created_at']
         
 class BulkForecastSerializer(serializers.Serializer):
     algorithm = serializers.ChoiceField(choices=['arima', 'xgboost', 'prophet', 'ensemble'])
