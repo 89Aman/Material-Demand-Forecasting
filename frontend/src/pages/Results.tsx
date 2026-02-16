@@ -144,7 +144,7 @@ export default function Results() {
             <div>
               <h1 className="text-3xl font-bold text-foreground">Forecast Results</h1>
               <p className="text-muted-foreground">
-                {displayData.product_name} · {formData?.location || 'Global'} · {Math.round(displayData.forecast_horizon_days / 7)} weeks
+                {displayData.product_name} · {formData?.location || 'Global'} · {displayData.forecast_horizon_days ? `${Math.round(displayData.forecast_horizon_days / 7)} weeks` : `${forecast?.details?.length || '?'} days`}
               </p>
             </div>
             <div className="flex gap-2">

@@ -76,8 +76,8 @@ class Command(BaseCommand):
                 records.append(HistoricalDemand(
                     product=product,
                     date=d,
-                    quantity_demanded=round(demand, 2),
-                    location='Mumbai',
+                    quantity_demanded=round(demand),
+                    actual_sales=round(demand * random.uniform(0.85, 1.05)),
                 ))
 
             HistoricalDemand.objects.bulk_create(records, ignore_conflicts=True)

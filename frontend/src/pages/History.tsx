@@ -103,27 +103,26 @@ export default function History() {
           </TableHeader>
           <TableBody>
             {isLoading ? (
-               <TableRow>
-                 <TableCell colSpan={7} className="text-center py-8">
-                    <Loader2 className="h-8 w-8 animate-spin mx-auto" />
-                 </TableCell>
-               </TableRow>
+              <TableRow>
+                <TableCell colSpan={7} className="text-center py-8">
+                  <Loader2 className="h-8 w-8 animate-spin mx-auto" />
+                </TableCell>
+              </TableRow>
             ) : filteredHistory.map((record) => (
               <TableRow key={record.id} className="hover:bg-muted/50">
                 <TableCell className="font-medium">{new Date(record.forecast_date).toLocaleDateString()}</TableCell>
                 <TableCell>{record.product_name}</TableCell>
                 <TableCell className="capitalize">{record.algorithm}</TableCell>
-                <TableCell className="text-center">{Math.round(record.forecast_horizon_days / 7)} weeks</TableCell>
-                <TableCell className="text-right">{record.predicted_demand.toLocaleString()} units</TableCell>
+                <TableCell className="text-center">{record.forecast_horizon_days ? `${Math.round(record.forecast_horizon_days / 7)} weeks` : `${(record as any).details?.length || '?'} days`}</TableCell>
+                <TableCell className="text-right">{Math.round(record.predicted_demand || 0).toLocaleString()} units</TableCell>
                 <TableCell className="text-right">
                   <span
-                    className={`rounded-full px-2 py-1 text-sm font-medium ${
-                      (record.accuracy_score || 0) >= 90
+                    className={`rounded-full px-2 py-1 text-sm font-medium ${(record.accuracy_score || 0) >= 90
                         ? "bg-kpi-green text-emerald-700"
                         : (record.accuracy_score || 0) >= 85
-                        ? "bg-alert-warning-bg text-alert-warning"
-                        : "bg-alert-critical-bg text-alert-critical"
-                    }`}
+                          ? "bg-alert-warning-bg text-alert-warning"
+                          : "bg-alert-critical-bg text-alert-critical"
+                      }`}
                   >
                     {record.accuracy_score ? `${record.accuracy_score}%` : 'N/A'}
                   </span>
@@ -136,7 +135,7 @@ export default function History() {
                       formData: {
                         material: record.product_name,
                         location: "N/A",
-                        horizon: Math.round(record.forecast_horizon_days / 7),
+                        horizon: record.forecast_horizon_days ? Math.round(record.forecast_horizon_days / 7) : 1,
                         scenario: "baseline",
                       },
                     }}
