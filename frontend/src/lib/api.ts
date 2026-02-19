@@ -1,5 +1,5 @@
 // Production backend URL
-export const PROD_API_URL = 'https://ims-backend-3sjloicekq-ew.a.run.app/api';
+export const PROD_API_URL = '/api';
 
 const API_BASE_URL = typeof window !== 'undefined' && window.location.hostname !== 'localhost'
   ? PROD_API_URL
